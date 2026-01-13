@@ -2,6 +2,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api import interviews, chat
+
 app = FastAPI(
     title="AI Interviewer API",
     description="Backend API for AI-powered technical interviews",
@@ -16,6 +18,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Include routers
+app.include_router(interviews.router)
+app.include_router(chat.router)
 
 
 @app.get("/")

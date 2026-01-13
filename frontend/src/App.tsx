@@ -1,40 +1,46 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import AdminDashboard from './pages/AdminDashboard';
+import CreateInterview from './pages/CreateInterview';
+import InterviewDetails from './pages/InterviewDetails';
+import CandidateInterview from './pages/CandidateInterview';
 
 function App() {
     return (
         <BrowserRouter>
-            <div className="min-h-screen bg-gray-50">
-                <Routes>
-                    <Route path="/" element={<HomePage />} />
-                    <Route path="/admin/*" element={<div>Admin Dashboard (Coming Soon)</div>} />
-                    <Route path="/interview/:token" element={<div>Candidate Interview (Coming Soon)</div>} />
-                </Routes>
-            </div>
+            <Routes>
+                {/* Redirect root to admin dashboard */}
+                <Route path="/" element={<Navigate to="/admin" replace />} />
+
+                {/* Admin routes */}
+                <Route path="/admin" element={<AdminDashboard />} />
+                <Route path="/admin/create" element={<CreateInterview />} />
+                <Route path="/admin/interviews/:id" element={<InterviewDetails />} />
+
+                {/* Candidate route */}
+                <Route path="/interview/:token" element={<CandidateInterview />} />
+
+                {/* 404 */}
+                <Route path="*" element={<NotFound />} />
+            </Routes>
         </BrowserRouter>
-    )
+    );
 }
 
-function HomePage() {
+function NotFound() {
     return (
-        <div className="flex items-center justify-center min-h-screen">
+        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
             <div className="text-center">
-                <h1 className="text-4xl font-bold text-gray-900 mb-4">
-                    AI Interviewer
-                </h1>
-                <p className="text-lg text-gray-600 mb-8">
-                    Intelligent technical interview platform
-                </p>
-                <div className="space-x-4">
-                    <a
-                        href="/admin"
-                        className="inline-block px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition"
-                    >
-                        Admin Dashboard
-                    </a>
-                </div>
+                <h1 className="text-6xl font-bold text-white mb-4">404</h1>
+                <p className="text-xl text-purple-200 mb-8">Page not found</p>
+                <a
+                    href="/admin"
+                    className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-200 inline-block"
+                >
+                    Go to Dashboard
+                </a>
             </div>
         </div>
-    )
+    );
 }
 
-export default App
+export default App;

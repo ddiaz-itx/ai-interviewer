@@ -18,7 +18,7 @@ pydantic-settings = "^2.1.0"
 langchain = "^0.1.0"
 langchain-openai = "^0.0.2"
 langchain-google-genai = "^0.0.6"
-pypdf2 = "^3.0.1"
+PyPDF2 = "^3.0.1"
 python-multipart = "^0.0.6"
 python-jose = {extras = ["cryptography"], version = "^3.3.0"}
 passlib = {extras = ["bcrypt"], version = "^1.7.4"}
@@ -28,7 +28,9 @@ tenacity = "^8.2.3"
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.4"
 pytest-asyncio = "^0.23.3"
+pytest-cov = "^4.1.0"
 httpx = "^0.26.0"
+aiosqlite = "^0.19.0"
 black = "^24.1.1"
 ruff = "^0.1.14"
 mypy = "^1.8.0"
