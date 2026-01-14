@@ -18,6 +18,7 @@ Before starting, ensure you have:
 Run the complete setup script:
 
 ```bash
+cd utils
 chmod +x setup.sh
 ./setup.sh
 ```
