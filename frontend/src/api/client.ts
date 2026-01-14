@@ -73,25 +73,52 @@ class ApiClient {
         this.baseUrl = baseUrl;
     }
 
+    private getAuthToken(): string | null {
+        return localStorage.getItem('auth_token');
+    }
+
     private async request<T>(
         endpoint: string,
         options: RequestInit = {}
     ): Promise<T> {
         const url = `${this.baseUrl}${endpoint}`;
+
+        // Get auth token and add to headers if available
+        const token = this.getAuthToken();
+        const headers: HeadersInit = {
+            'Content-Type': 'application/json',
+            ...options.headers,
+        };
+
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
         const response = await fetch(url, {
             ...options,
-            headers: {
-                'Content-Type': 'application/json',
-                ...options.headers,
-            },
+            headers,
         });
 
         if (!response.ok) {
+            // Handle 401 Unauthorized
+            if (response.status === 401) {
+                localStorage.removeItem('auth_token');
+                window.location.href = '/login';
+            }
+
             const error = await response.json().catch(() => ({ detail: 'Unknown error' }));
             throw new Error(error.detail || `HTTP ${response.status}`);
         }
 
         return response.json();
+    }
+
+    // Authentication endpoints
+    async login(username: string, password: string): Promise<{ access_token: string; token_type: string }> {
+        return this.request<{ access_token: string; token_type: string }>('/auth/login', {
+            method: 'POST',
+            body: JSON.stringify({ username, password }),
+        });
     }
 
     // Interview endpoints
