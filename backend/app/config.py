@@ -14,6 +14,15 @@ class Settings(BaseSettings):
     secret_key: str = "change-this-in-production"
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 60 * 24 * 7  # 1 week
+    
+    # Uppercase aliases for compatibility
+    @property
+    def SECRET_KEY(self) -> str:
+        return self.secret_key
+    
+    @property
+    def ALGORITHM(self) -> str:
+        return self.algorithm
 
     # LLM Provider
     llm_provider: str = "openai"  # openai, gemini, ollama

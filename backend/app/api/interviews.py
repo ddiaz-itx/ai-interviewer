@@ -2,6 +2,7 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.dependencies import require_admin
 from app.database import get_db
 from app.schemas.interview import (
     InterviewCreate,
@@ -23,6 +24,7 @@ router = APIRouter(prefix="/interviews", tags=["interviews"])
 async def create_interview(
     interview_data: InterviewCreate,
     db: AsyncSession = Depends(get_db),
+    current_user: dict = Depends(require_admin),
 ):
     """
     Create a new interview in DRAFT status.
@@ -43,6 +45,7 @@ async def list_interviews(
     skip: int = 0,
     limit: int = 100,
     db: AsyncSession = Depends(get_db),
+    current_user: dict = Depends(require_admin),
 ):
     """
     List all interviews with pagination.
@@ -73,6 +76,7 @@ async def list_interviews(
 async def get_interview(
     interview_id: int,
     db: AsyncSession = Depends(get_db),
+    current_user: dict = Depends(require_admin),
 ):
     """
     Get interview by ID.
@@ -102,6 +106,7 @@ async def upload_documents(
     role_description: UploadFile = File(..., description="Role description (PDF)"),
     job_offering: UploadFile = File(..., description="Job offering (PDF)"),
     db: AsyncSession = Depends(get_db),
+    current_user: dict = Depends(require_admin),
 ):
     """
     Upload documents for an interview and run match analysis.
@@ -166,6 +171,7 @@ async def upload_documents(
 async def assign_interview(
     interview_id: int,
     db: AsyncSession = Depends(get_db),
+    current_user: dict = Depends(require_admin),
 ):
     """
     Generate candidate link and transition to ASSIGNED status.
@@ -191,6 +197,7 @@ async def assign_interview(
 async def complete_interview(
     interview_id: int,
     db: AsyncSession = Depends(get_db),
+    current_user: dict = Depends(require_admin),
 ):
     """
     Complete interview and generate final report.
