@@ -94,7 +94,9 @@ class InterviewListResponse(BaseModel):
 
     id: int
     status: str
+    target_questions: int
     match_score: int | None = None
+    interview_score: int | None = None
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)

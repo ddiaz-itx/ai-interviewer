@@ -5,6 +5,7 @@ import Login from './pages/Login';
 import AdminDashboard from './pages/AdminDashboard';
 import CreateInterview from './pages/CreateInterview';
 import InterviewDetails from './pages/InterviewDetails';
+import UploadDocuments from './pages/UploadDocuments';
 import CandidateInterview from './pages/CandidateInterview';
 
 function App() {
@@ -38,6 +39,14 @@ function App() {
                         element={
                             <ProtectedRoute>
                                 <InterviewDetails />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/admin/interviews/:id/upload"
+                        element={
+                            <ProtectedRoute>
+                                <UploadDocuments />
                             </ProtectedRoute>
                         }
                     />

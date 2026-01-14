@@ -7,6 +7,7 @@ export default function CandidateInterview() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [interviewId, setInterviewId] = useState<number | null>(null);
+    const [targetQuestions, setTargetQuestions] = useState<number>(0);
     const [messages, setMessages] = useState<Message[]>([]);
     const [currentMessage, setCurrentMessage] = useState('');
     const [sending, setSending] = useState(false);
@@ -46,6 +47,10 @@ export default function CandidateInterview() {
         try {
             const response = await apiClient.startInterview(token);
             setInterviewId(response.interview_id);
+
+            // Fetch interview details to get target_questions
+            const interview = await apiClient.getInterview(response.interview_id);
+            setTargetQuestions(interview.target_questions);
 
             // Add introduction and first question as messages
             setMessages([
@@ -179,7 +184,7 @@ export default function CandidateInterview() {
                 <div className="max-w-4xl mx-auto flex items-center justify-between">
                     <h1 className="text-2xl font-bold text-white">AI Technical Interview</h1>
                     <div className="text-purple-200">
-                        Question {questionCount} of {messages[0]?.interview_id || '?'}
+                        Question {questionCount} of {targetQuestions}
                     </div>
                 </div>
             </div>

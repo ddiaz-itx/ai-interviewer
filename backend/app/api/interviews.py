@@ -70,7 +70,9 @@ async def list_interviews(
         InterviewListResponse(
             id=interview.id,
             status=interview.status,
+            target_questions=interview.target_questions,
             match_score=interview.match_analysis_json.get("match_score") if interview.match_analysis_json else None,
+            interview_score=interview.report_json.get("interview_score") if interview.report_json else None,
             created_at=interview.created_at,
         )
         for interview in interviews

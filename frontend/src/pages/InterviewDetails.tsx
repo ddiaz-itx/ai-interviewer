@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { apiClient, Interview } from '../api/client';
 
@@ -267,6 +267,15 @@ export default function InterviewDetails() {
                 <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-8 border border-white/20">
                     <h2 className="text-2xl font-bold text-white mb-4">Actions</h2>
                     <div className="flex gap-4">
+                        {interview.status === 'DRAFT' && (
+                            <button
+                                onClick={() => navigate(`/admin/interviews/${interview.id}/upload`)}
+                                className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-200"
+                            >
+                                Upload Documents
+                            </button>
+                        )}
+
                         {interview.status === 'READY' && (
                             <button
                                 onClick={handleAssign}

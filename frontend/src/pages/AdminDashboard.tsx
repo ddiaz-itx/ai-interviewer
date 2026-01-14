@@ -2,12 +2,17 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiClient, Interview } from '../api/client';
 
+type SortField = 'id' | 'created_at';
+type SortDirection = 'asc' | 'desc';
+
 export default function AdminDashboard() {
     const navigate = useNavigate();
     const [interviews, setInterviews] = useState<Interview[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [filter, setFilter] = useState<string>('ALL');
+    const [statusFilter, setStatusFilter] = useState<string>('ALL');
+    const [sortField, setSortField] = useState<SortField>('created_at');
+    const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
 
     useEffect(() => {
         loadInterviews();
@@ -25,10 +30,33 @@ export default function AdminDashboard() {
         }
     };
 
-    const filteredInterviews =
-        filter === 'ALL'
-            ? interviews
-            : interviews.filter((interview) => interview.status === filter);
+    const handleSort = (field: SortField) => {
+        if (sortField === field) {
+            // Toggle direction if same field
+            setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+        } else {
+            // New field, default to descending
+            setSortField(field);
+            setSortDirection('desc');
+        }
+    };
+
+    const filteredInterviews = statusFilter === 'ALL'
+        ? interviews
+        : interviews.filter((i) => i.status === statusFilter);
+
+    // Sort interviews
+    const sortedInterviews = [...filteredInterviews].sort((a, b) => {
+        let comparison = 0;
+
+        if (sortField === 'id') {
+            comparison = a.id - b.id;
+        } else if (sortField === 'created_at') {
+            comparison = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+        }
+
+        return sortDirection === 'asc' ? comparison : -comparison;
+    });
 
     const statusCounts = {
         ALL: interviews.length,
@@ -78,19 +106,18 @@ export default function AdminDashboard() {
                     </div>
                 )}
 
-                {/* Statistics */}
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
-                    {Object.entries(statusCounts).map(([status, count]) => (
+                    {(Object.keys(statusCounts) as Array<keyof typeof statusCounts>).map((status) => (
                         <button
                             key={status}
-                            onClick={() => setFilter(status)}
-                            className={`bg-white/10 backdrop-blur-lg rounded-xl p-4 border transition-all duration-200 ${filter === status
-                                ? 'border-purple-500 ring-2 ring-purple-500'
-                                : 'border-white/20 hover:border-white/40'
+                            onClick={() => setStatusFilter(status)}
+                            className={`flex-1 px-6 py-4 rounded-xl transition-all duration-200 ${statusFilter === status
+                                ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg scale-105'
+                                : 'bg-white/5 text-white/70 hover:bg-white/10'
                                 }`}
                         >
-                            <div className="text-3xl font-bold text-white mb-1">{count}</div>
-                            <div className="text-sm text-purple-200">{status.replace('_', ' ')}</div>
+                            <div className="text-3xl font-bold mb-1">{statusCounts[status]}</div>
+                            <div className="text-sm font-medium">{status}</div>
                         </button>
                     ))}
                 </div>
@@ -101,8 +128,18 @@ export default function AdminDashboard() {
                         <table className="w-full">
                             <thead className="bg-white/5 border-b border-white/20">
                                 <tr>
-                                    <th className="px-6 py-4 text-left text-sm font-semibold text-purple-200">
-                                        ID
+                                    <th
+                                        className="px-6 py-4 text-left text-sm font-semibold text-purple-200 cursor-pointer hover:text-purple-100 select-none"
+                                        onClick={() => handleSort('id')}
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            ID
+                                            {sortField === 'id' && (
+                                                <span className="text-xs">
+                                                    {sortDirection === 'asc' ? '↑' : '↓'}
+                                                </span>
+                                            )}
+                                        </div>
                                     </th>
                                     <th className="px-6 py-4 text-left text-sm font-semibold text-purple-200">
                                         Status
@@ -111,10 +148,23 @@ export default function AdminDashboard() {
                                         Match Score
                                     </th>
                                     <th className="px-6 py-4 text-left text-sm font-semibold text-purple-200">
-                                        Questions
+                                        Final Score
                                     </th>
                                     <th className="px-6 py-4 text-left text-sm font-semibold text-purple-200">
-                                        Created
+                                        Questions
+                                    </th>
+                                    <th
+                                        className="px-6 py-4 text-left text-sm font-semibold text-purple-200 cursor-pointer hover:text-purple-100 select-none"
+                                        onClick={() => handleSort('created_at')}
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            Created
+                                            {sortField === 'created_at' && (
+                                                <span className="text-xs">
+                                                    {sortDirection === 'asc' ? '↑' : '↓'}
+                                                </span>
+                                            )}
+                                        </div>
                                     </th>
                                     <th className="px-6 py-4 text-left text-sm font-semibold text-purple-200">
                                         Actions
@@ -124,12 +174,12 @@ export default function AdminDashboard() {
                             <tbody className="divide-y divide-white/10">
                                 {filteredInterviews.length === 0 ? (
                                     <tr>
-                                        <td colSpan={6} className="px-6 py-12 text-center text-white/50">
+                                        <td colSpan={7} className="px-6 py-12 text-center text-white/50">
                                             No interviews found
                                         </td>
                                     </tr>
                                 ) : (
-                                    filteredInterviews.map((interview) => (
+                                    sortedInterviews.map((interview) => (
                                         <tr
                                             key={interview.id}
                                             className="hover:bg-white/5 transition-colors cursor-pointer"
@@ -145,17 +195,35 @@ export default function AdminDashboard() {
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 text-white">
-                                                {interview.match_analysis_json ? (
+                                                {interview.match_score ? (
                                                     <div className="flex items-center">
                                                         <span className="font-semibold">
-                                                            {interview.match_analysis_json.match_score}/10
+                                                            {interview.match_score}/10
                                                         </span>
                                                         <div className="ml-3 w-20 bg-white/20 rounded-full h-2">
                                                             <div
                                                                 className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full"
                                                                 style={{
-                                                                    width: `${(interview.match_analysis_json.match_score / 10) * 100
-                                                                        }%`,
+                                                                    width: `${(interview.match_score / 10) * 100}%`,
+                                                                }}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <span className="text-white/50">-</span>
+                                                )}
+                                            </td>
+                                            <td className="px-6 py-4 text-white">
+                                                {interview.interview_score ? (
+                                                    <div className="flex items-center">
+                                                        <span className="font-semibold">
+                                                            {interview.interview_score}/10
+                                                        </span>
+                                                        <div className="ml-3 w-20 bg-white/20 rounded-full h-2">
+                                                            <div
+                                                                className="bg-gradient-to-r from-green-500 to-emerald-500 h-2 rounded-full"
+                                                                style={{
+                                                                    width: `${(interview.interview_score / 10) * 100}%`,
                                                                 }}
                                                             />
                                                         </div>

@@ -9,6 +9,8 @@ export interface Interview {
     status: string;
     target_questions: number;
     difficulty_start: number;
+    match_score?: number; // From list endpoint
+    interview_score?: number; // From list endpoint
     match_analysis_json?: {
         match_score: number;
         match_summary: string;
@@ -149,12 +151,25 @@ class ApiClient {
         formData.append('job_offering', jobOffering);
 
         const url = `${this.baseUrl}/interviews/${id}/upload`;
+        const token = this.getAuthToken();
+
+        const headers: Record<string, string> = {};
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
         const response = await fetch(url, {
             method: 'POST',
+            headers,
             body: formData,
         });
 
         if (!response.ok) {
+            if (response.status === 401) {
+                localStorage.removeItem('auth_token');
+                window.location.href = '/login';
+            }
+
             const error = await response.json().catch(() => ({ detail: 'Upload failed' }));
             throw new Error(error.detail || `HTTP ${response.status}`);
         }
