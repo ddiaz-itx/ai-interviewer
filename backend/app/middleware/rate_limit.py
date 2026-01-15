@@ -1,10 +1,18 @@
 """Rate limiting configuration for API endpoints."""
+import os
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
 
+# Check if we're in testing mode
+_testing = os.getenv("TESTING", "false").lower() == "true"
+
 # Initialize rate limiter with in-memory storage
-limiter = Limiter(key_func=get_remote_address)
+# Disable rate limiting during tests
+limiter = Limiter(
+    key_func=get_remote_address,
+    enabled=not _testing,
+)
 
 
 # Rate limit configurations

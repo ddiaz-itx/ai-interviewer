@@ -20,6 +20,15 @@ app = FastAPI(
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
+from app.utils.state_machine import StateTransitionError
+
+@app.exception_handler(StateTransitionError)
+async def state_transition_exception_handler(request: Request, exc: StateTransitionError):
+    return JSONResponse(
+        status_code=400,
+        content={"detail": str(exc)},
+    )
+
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,

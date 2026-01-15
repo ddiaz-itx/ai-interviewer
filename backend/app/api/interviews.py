@@ -334,7 +334,7 @@ async def get_cost_statistics(
             func.sum(LLMUsage.estimated_cost).label("total_cost"),
             func.sum(LLMUsage.total_tokens).label("total_tokens"),
             func.count(LLMUsage.id).label("total_calls"),
-            func.sum(func.cast(LLMUsage.cached, db.bind.dialect.NUMERIC)).label("cache_hits"),
+            func.sum(func.cast(LLMUsage.cached, sa.Integer)).label("cache_hits"),
         )
     )
     stats = result.one()

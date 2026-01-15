@@ -49,22 +49,40 @@ async def client(test_db):
             yield session
 
     app.dependency_overrides[get_db] = override_get_db
+    
+    # Disable rate limiting for tests
+    from app.middleware.rate_limit import limiter
+    limiter._enabled = False
 
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
         yield ac
-
+    
+    # Re-enable after tests
+    limiter._enabled = True
     app.dependency_overrides.clear()
+
+
+@pytest_asyncio.fixture
+async def admin_token(client):
+    """Get admin authentication token."""
+    response = await client.post(
+        "/auth/login",
+        json={"username": "admin", "password": "admin123"},
+    )
+    assert response.status_code == 200
+    return response.json()["access_token"]
 
 
 @pytest.mark.asyncio
 class TestInterviewEndpoints:
     """Test interview endpoints."""
 
-    async def test_create_interview(self, client):
+    async def test_create_interview(self, client, admin_token):
         """Test creating an interview."""
         response = await client.post(
             "/interviews/",
             json={"target_questions": 5, "difficulty_start": 5},
+            headers={"Authorization": f"Bearer {admin_token}"},
         )
 
         assert response.status_code == 201
@@ -74,62 +92,77 @@ class TestInterviewEndpoints:
         assert data["difficulty_start"] == 5
         assert "id" in data
 
-    async def test_list_interviews(self, client):
+    async def test_list_interviews(self, client, admin_token):
         """Test listing interviews."""
         # Create an interview first
         await client.post(
             "/interviews/",
             json={"target_questions": 5, "difficulty_start": 5},
+            headers={"Authorization": f"Bearer {admin_token}"},
         )
 
         # List interviews
-        response = await client.get("/interviews/")
+        response = await client.get(
+            "/interviews/",
+            headers={"Authorization": f"Bearer {admin_token}"},
+        )
 
         assert response.status_code == 200
         data = response.json()
         assert isinstance(data, list)
         assert len(data) >= 1
 
-    async def test_get_interview(self, client):
+    async def test_get_interview(self, client, admin_token):
         """Test getting interview by ID."""
         # Create interview
         create_response = await client.post(
             "/interviews/",
             json={"target_questions": 5, "difficulty_start": 5},
+            headers={"Authorization": f"Bearer {admin_token}"},
         )
         interview_id = create_response.json()["id"]
 
         # Get interview
-        response = await client.get(f"/interviews/{interview_id}")
+        response = await client.get(
+            f"/interviews/{interview_id}",
+            headers={"Authorization": f"Bearer {admin_token}"},
+        )
 
         assert response.status_code == 200
         data = response.json()
         assert data["id"] == interview_id
 
-    async def test_get_nonexistent_interview(self, client):
+    async def test_get_nonexistent_interview(self, client, admin_token):
         """Test getting non-existent interview."""
-        response = await client.get("/interviews/999")
+        response = await client.get(
+            "/interviews/999",
+            headers={"Authorization": f"Bearer {admin_token}"},
+        )
 
         assert response.status_code == 404
 
     @pytest.mark.skip(reason="Requires actual PDF files and LLM API")
-    async def test_upload_documents(self, client):
+    async def test_upload_documents(self, client, admin_token):
         """Test document upload (requires real files)."""
         # This test would require actual PDF files
         # and LLM API key to run
         pass
 
-    async def test_assign_interview_invalid_state(self, client):
+    async def test_assign_interview_invalid_state(self, client, admin_token):
         """Test assigning interview in wrong state."""
         # Create interview (DRAFT status)
         create_response = await client.post(
             "/interviews/",
             json={"target_questions": 5, "difficulty_start": 5},
+            headers={"Authorization": f"Bearer {admin_token}"},
         )
         interview_id = create_response.json()["id"]
 
         # Try to assign (should fail - needs to be READY first)
-        response = await client.post(f"/interviews/{interview_id}/assign")
+        response = await client.post(
+            f"/interviews/{interview_id}/assign",
+            headers={"Authorization": f"Bearer {admin_token}"},
+        )
 
         assert response.status_code == 400
 
@@ -144,12 +177,13 @@ class TestChatEndpoints:
 
         assert response.status_code == 400
 
-    async def test_get_messages_empty(self, client):
+    async def test_get_messages_empty(self, client, admin_token):
         """Test getting messages for interview with no messages."""
         # Create interview
         create_response = await client.post(
             "/interviews/",
             json={"target_questions": 5, "difficulty_start": 5},
+            headers={"Authorization": f"Bearer {admin_token}"},
         )
         interview_id = create_response.json()["id"]
 
@@ -180,7 +214,7 @@ class TestHealthEndpoints:
         assert response.status_code == 200
         data = response.json()
         assert "message" in data
-        assert "status" in data
+        assert "version" in data
 
     async def test_health(self, client):
         """Test health check endpoint."""

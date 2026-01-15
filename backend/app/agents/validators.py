@@ -1,5 +1,5 @@
 """Input validators for agents."""
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
 
 class DocumentInput(BaseModel):
@@ -9,7 +9,8 @@ class DocumentInput(BaseModel):
     role_description_text: str = Field(..., min_length=20, max_length=10000)
     job_offering_text: str = Field(..., min_length=20, max_length=10000)
 
-    @validator("*")
+    @field_validator("resume_text", "role_description_text", "job_offering_text")
+    @classmethod
     def not_empty_or_whitespace(cls, v: str) -> str:
         """Ensure text is not empty or just whitespace."""
         if not v or not v.strip():
@@ -23,7 +24,8 @@ class QuestionAnswerInput(BaseModel):
     question: str = Field(..., min_length=10, max_length=1000)
     answer: str = Field(..., min_length=1, max_length=5000)
 
-    @validator("*")
+    @field_validator("question", "answer")
+    @classmethod
     def not_empty_or_whitespace(cls, v: str) -> str:
         """Ensure text is not empty or just whitespace."""
         if not v or not v.strip():
@@ -34,12 +36,13 @@ class QuestionAnswerInput(BaseModel):
 class QuestionGenerationInput(BaseModel):
     """Validated input for question generation."""
 
-    focus_areas: list[str] = Field(..., min_items=1, max_items=10)
+    focus_areas: list[str] = Field(..., min_length=1, max_length=10)
     difficulty_level: float = Field(..., ge=3.0, le=10.0)
     chat_history: str = Field(default="", max_length=50000)
     questions_asked: int = Field(..., ge=0, le=50)
 
-    @validator("focus_areas")
+    @field_validator("focus_areas")
+    @classmethod
     def validate_focus_areas(cls, v: list[str]) -> list[str]:
         """Ensure focus areas are not empty."""
         if not all(area.strip() for area in v):
@@ -53,7 +56,8 @@ class MessageClassificationInput(BaseModel):
     current_question: str = Field(..., min_length=10, max_length=1000)
     candidate_message: str = Field(..., min_length=1, max_length=5000)
 
-    @validator("*")
+    @field_validator("current_question", "candidate_message")
+    @classmethod
     def not_empty_or_whitespace(cls, v: str) -> str:
         """Ensure text is not empty or just whitespace."""
         if not v or not v.strip():
