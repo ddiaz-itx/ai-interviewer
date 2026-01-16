@@ -309,11 +309,13 @@ class InterviewService:
         telemetry_summary = f"Total messages: {len(messages)}, Paste events: {paste_count}"
 
         # Generate report
-        final_report = generate_report(
+        final_report = await generate_report(
             match_analysis=interview.match_analysis_json or {},
             transcript=transcript,
             question_scores=question_scores,
             telemetry_summary=telemetry_summary,
+            db=db,
+            interview_id=interview_id,
         )
 
         # Update interview

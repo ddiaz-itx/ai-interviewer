@@ -63,3 +63,20 @@ class MessageClassificationInput(BaseModel):
         if not v or not v.strip():
             raise ValueError("Text cannot be empty or whitespace only")
         return v.strip()
+
+
+class IntegrityAdjustmentInput(BaseModel):
+    """Validated input for integrity assessment."""
+
+    question: str = Field(..., min_length=10, max_length=1000)
+    answer: str = Field(..., min_length=1, max_length=5000)
+    response_time_ms: int = Field(..., ge=0)
+    paste_detected: bool = Field(default=False)
+
+    @field_validator("question", "answer")
+    @classmethod
+    def not_empty_or_whitespace(cls, v: str) -> str:
+        """Ensure text is not empty or just whitespace."""
+        if not v or not v.strip():
+            raise ValueError("Text cannot be empty or whitespace only")
+        return v.strip()

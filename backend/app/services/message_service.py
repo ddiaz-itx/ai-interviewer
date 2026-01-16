@@ -122,12 +122,22 @@ class MessageService:
             raise ValueError("No current question found")
 
         # Classify the message
-        classification = classify_message(last_question, candidate_message.content)
+        classification = await classify_message(
+            last_question,
+            candidate_message.content,
+            db=db,
+            interview_id=interview_id
+        )
 
         # Handle based on classification
         if classification.type == "Answer":
             # Evaluate the answer
-            evaluation = evaluate_answer(last_question, candidate_message.content)
+            evaluation = await evaluate_answer(
+                last_question,
+                candidate_message.content,
+                db=db,
+                interview_id=interview_id
+            )
 
             # Optional: Assess integrity
             previous_answers = [
@@ -185,11 +195,13 @@ class MessageService:
             focus_areas = interview.match_analysis_json.get("focus_areas", [])
             chat_history = "\n".join([f"{m.role}: {m.content}" for m in messages])
 
-            next_question = generate_question(
+            next_question = await generate_question(
                 focus_areas=focus_areas,
                 difficulty_level=interview.difficulty_start,
                 chat_history=chat_history,
                 questions_asked=questions_asked,
+                db=db,
+                interview_id=interview_id,
             )
 
             # Save next question

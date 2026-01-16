@@ -1,7 +1,7 @@
 """End-to-end tests for the full interview lifecycle."""
 import pytest
 from httpx import AsyncClient
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch, AsyncMock
 from app.utils.state_machine import InterviewStatus
 
 @pytest.mark.asyncio
@@ -88,7 +88,9 @@ class TestInterviewE2E:
         # Note: generate_introduction is imported at top level in chat.py, so patch where used.
         # generate_question is imported inside the function, so patching the source Works.
         with patch("app.api.chat.generate_introduction", return_value="Welcome to the interview!"), \
-             patch("app.agents.generate_question", return_value="What is unit testing?"):
+             patch("app.agents.generate_question", new_callable=AsyncMock) as mock_gen_q:
+            
+            mock_gen_q.return_value = "What is unit testing?"
             
             start_response = await test_client.post(f"/chat/start/{token}")
             assert start_response.status_code == 200
@@ -107,10 +109,10 @@ class TestInterviewE2E:
         # -----------------------------------------------
         # We Mock the functions imported in message_service.py
         
-        with patch("app.services.message_service.classify_message") as mock_classify, \
-             patch("app.services.message_service.evaluate_answer") as mock_evaluate, \
-             patch("app.services.message_service.generate_question") as mock_generate, \
-             patch("app.services.message_service.assess_integrity") as mock_integrity:
+        with patch("app.services.message_service.classify_message", new_callable=AsyncMock) as mock_classify, \
+             patch("app.services.message_service.evaluate_answer", new_callable=AsyncMock) as mock_evaluate, \
+             patch("app.services.message_service.generate_question", new_callable=AsyncMock) as mock_generate, \
+             patch("app.services.message_service.assess_integrity", new_callable=AsyncMock) as mock_integrity:
             
             # Mock Classifier Result
             mock_classify.return_value = MagicMock(type="Answer", confidence=0.9)

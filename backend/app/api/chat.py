@@ -63,11 +63,13 @@ async def start_interview(
         from app.agents import generate_question
         focus_areas = interview.match_analysis_json.get("focus_areas", ["General"])
 
-        first_question = generate_question(
+        first_question = await generate_question(
             focus_areas=focus_areas,
             difficulty_level=interview.difficulty_start,
             chat_history="",
             questions_asked=0,
+            db=db,
+            interview_id=interview.id,
         )
 
         # Save first question
