@@ -104,11 +104,11 @@ class ApiClient {
     private baseUrl: string;
 
     constructor() {
-        this.baseUrl = import.meta.env?.VITE_API_URL || 'http://localhost:8000';
+        this.baseUrl = import.meta.env?.VITE_API_URL || '/api';
     }
 
     private getAuthToken(): string | null {
-        return localStorage.getItem('token');
+        return localStorage.getItem('auth_token');
     }
 
     private async request<T>(
@@ -142,6 +142,10 @@ class ApiClient {
 
             const error = await response.json().catch(() => ({ detail: 'Unknown error' }));
             throw new Error(error.detail || `HTTP ${response.status}`);
+        }
+
+        if (response.status === 204) {
+            return {} as T;
         }
 
         return response.json();
@@ -218,6 +222,12 @@ class ApiClient {
     async completeInterview(id: number): Promise<Interview> {
         return this.request<Interview>(`/interviews/${id}/complete`, {
             method: 'POST',
+        });
+    }
+
+    async deleteInterview(id: number): Promise<void> {
+        return this.request<void>(`/interviews/${id}`, {
+            method: 'DELETE',
         });
     }
 

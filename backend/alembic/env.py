@@ -11,7 +11,7 @@ from alembic import context
 # Import models and config
 from app.config import settings
 from app.database import Base
-from app.models import Interview, Message  # noqa: F401
+from app.models import Interview, Message, LLMUsage  # noqa: F401
 
 # this is the Alembic Config object
 config = context.config

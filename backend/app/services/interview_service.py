@@ -328,3 +328,26 @@ class InterviewService:
         await db.refresh(interview)
 
         return interview
+
+    @staticmethod
+    async def delete_interview(db: AsyncSession, interview_id: int) -> bool:
+        """
+        Delete an interview.
+
+        Args:
+            db: Database session
+            interview_id: Interview ID
+
+        Returns:
+            True if deleted, False if not found
+        """
+        result = await db.execute(select(Interview).where(Interview.id == interview_id))
+        interview = result.scalar_one_or_none()
+
+        if not interview:
+            return False
+
+        await db.delete(interview)
+        await db.commit()
+
+        return True

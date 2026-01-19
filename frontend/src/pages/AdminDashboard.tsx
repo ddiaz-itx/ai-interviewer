@@ -50,6 +50,18 @@ export default function AdminDashboard() {
         }
     };
 
+    const handleDelete = async (e: React.MouseEvent, id: number) => {
+        e.stopPropagation();
+        if (window.confirm('Are you sure you want to delete this interview? This action cannot be undone.')) {
+            try {
+                await apiClient.deleteInterview(id);
+                setInterviews(interviews.filter(i => i.id !== id));
+            } catch (err) {
+                setError(err instanceof Error ? err.message : 'Failed to delete interview');
+            }
+        }
+    };
+
     const filteredInterviews = statusFilter === 'ALL'
         ? interviews
         : interviews.filter((i) => i.status === statusFilter);
@@ -111,7 +123,7 @@ export default function AdminDashboard() {
                         </div>
                     )}
                     <button
-                        onClick={() => navigate('/admin/interviews/create')}
+                        onClick={() => navigate('/admin/create')}
                         className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-200 font-semibold shadow-lg"
                     >
                         + Create Interview
@@ -255,15 +267,23 @@ export default function AdminDashboard() {
                                                 {new Date(interview.created_at).toLocaleDateString()}
                                             </td>
                                             <td className="px-6 py-4">
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        navigate(`/admin/interviews/${interview.id}`);
-                                                    }}
-                                                    className="px-4 py-2 bg-purple-500/30 hover:bg-purple-500/50 text-purple-100 rounded-lg transition-colors text-sm font-medium"
-                                                >
-                                                    View Details
-                                                </button>
+                                                <div className="flex gap-2">
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            navigate(`/admin/interviews/${interview.id}`);
+                                                        }}
+                                                        className="px-4 py-2 bg-purple-500/30 hover:bg-purple-500/50 text-purple-100 rounded-lg transition-colors text-sm font-medium"
+                                                    >
+                                                        View Details
+                                                    </button>
+                                                    <button
+                                                        onClick={(e) => handleDelete(e, interview.id)}
+                                                        className="px-4 py-2 bg-red-500/30 hover:bg-red-500/50 text-red-100 rounded-lg transition-colors text-sm font-medium"
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     ))

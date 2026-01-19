@@ -11,7 +11,6 @@ export default function InterviewDetails() {
     const [error, setError] = useState<string | null>(null);
     const [assigning, setAssigning] = useState(false);
     const [completing, setCompleting] = useState(false);
-    const [candidateLink, setCandidateLink] = useState<string>('');
 
     useEffect(() => {
         loadInterview();

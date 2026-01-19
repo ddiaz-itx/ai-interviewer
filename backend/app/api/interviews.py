@@ -108,6 +108,32 @@ async def get_interview(
     return interview
 
 
+@router.delete("/{interview_id}", status_code=204)
+@limiter.limit(RATE_LIMIT_ADMIN)
+async def delete_interview(
+    request: Request,
+    interview_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: dict = Depends(require_admin),
+):
+    """
+    Delete an interview.
+
+    Args:
+        interview_id: Interview ID
+        db: Database session
+
+    Raises:
+        HTTPException: If interview not found
+    """
+    deleted = await InterviewService.delete_interview(db, interview_id)
+
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Interview not found")
+
+    return None
+
+
 @router.post("/{interview_id}/upload", response_model=InterviewResponse)
 @limiter.limit(RATE_LIMIT_ADMIN)
 async def upload_documents(

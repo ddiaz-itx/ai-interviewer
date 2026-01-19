@@ -141,6 +141,32 @@ class TestInterviewEndpoints:
 
         assert response.status_code == 404
 
+    async def test_delete_interview(self, client, admin_token):
+        """Test deleting an interview."""
+        # Create interview
+        create_response = await client.post(
+            "/interviews/",
+            json={"target_questions": 5, "difficulty_start": 5},
+            headers={"Authorization": f"Bearer {admin_token}"},
+        )
+        interview_id = create_response.json()["id"]
+
+        # Delete interview
+        response = await client.delete(
+            f"/interviews/{interview_id}",
+            headers={"Authorization": f"Bearer {admin_token}"},
+        )
+
+        assert response.status_code == 204
+
+        # Verify it's gone
+        response = await client.get(
+            f"/interviews/{interview_id}",
+            headers={"Authorization": f"Bearer {admin_token}"},
+        )
+
+        assert response.status_code == 404
+
     @pytest.mark.skip(reason="Requires actual PDF files and LLM API")
     async def test_upload_documents(self, client, admin_token):
         """Test document upload (requires real files)."""

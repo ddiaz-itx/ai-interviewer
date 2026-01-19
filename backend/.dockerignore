@@ -9,7 +9,6 @@ venv/
 .venv
 Pipfile
 Pipfile.lock
-poetry.lock
 .git
 .gitignore
 .pytest_cache/

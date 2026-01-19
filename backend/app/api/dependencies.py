@@ -25,9 +25,12 @@ async def get_current_user(
         HTTPException: If token is invalid or expired
     """
     token = credentials.credentials
+    print(f"DEBUG: Received token: {token[:10]}...")
     payload = verify_token(token)
+    print(f"DEBUG: Token verification payload: {payload}")
     
     if payload is None:
+        print("DEBUG: Token verification failed (payload is None)")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid authentication credentials",
@@ -36,6 +39,7 @@ async def get_current_user(
     
     username = payload.get("sub")
     if username is None:
+        print("DEBUG: Username not found in payload")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid authentication credentials",
