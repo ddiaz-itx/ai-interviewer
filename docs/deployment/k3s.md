@@ -34,6 +34,19 @@ Edit `k8s/02-secrets.yaml` and fill in your actual values:
 *   `SECRET_KEY`: Generate with `openssl rand -hex 32`.
 *   `OPENAI_API_KEY` / `GEMINI_API_KEY`: Your LLM keys.
 
+## 2.5 Frontend Environment Configuration
+
+In production, you must set the `VITE_API_URL` environment variable for the frontend if your API is hosted on a separate subdomain.
+
+**CRITICAL:** The URL must end with `/api`.
+
+*   **Scenario A**: Separate API Subdomain (e.g., `api.example.com`)
+    *   Set `VITE_API_URL` to `https://api.example.com/api`
+*   **Scenario B**: Common Domain (e.g., `example.com/api`)
+    *   Leave `VITE_API_URL` empty (defaults to relative `/api` path)
+
+You can set this in `k8s/05-frontend.yaml` as an environment variable or via a ConfigMap.
+
 ## 3. Apply Manifests
 
 Apply the manifests in order:

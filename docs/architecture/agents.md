@@ -65,3 +65,33 @@ class FinalReport(BaseModel):
     meeting_expectations: List[str] = Field(..., description="Areas meeting expectations")
     integrity_flags: List[str] = Field(..., description="List of suspicious behaviors")
 ```
+
+---
+ 
+ ## 5. Message Classification Agent
+ 
+ **Trigger**: On every candidate message.
+ 
+ **Input**: `message`.
+ 
+ **Goal**: Classify message as `ANSWER`, `CLARIFICATION`, or `GREETING` to determine flow.
+ 
+ ---
+ 
+ ## 6. Integrity Judgment Agent
+ 
+ **Trigger**: After every answer.
+ 
+ **Input**: `question`, `answer`.
+ 
+ **Logic**:
+ - Checks for suspicious patterns (e.g., pasting large blocks of text, unnatural phrasing).
+ - Tracks response time (telemetry).
+ 
+ **Output Schema**:
+ ```python
+ class IntegrityCheck(BaseModel):
+     is_suspicious: bool
+     flags: List[str]
+     confidence: float
+ ```

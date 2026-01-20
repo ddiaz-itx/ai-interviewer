@@ -39,9 +39,9 @@ app.add_middleware(
 )
 
 # Include routers
-app.include_router(auth.router)  # Public auth endpoints
-app.include_router(interviews.router)  # Admin endpoints (protected)
-app.include_router(chat.router)  # Chat endpoints (public for candidates)
+app.include_router(auth.router, prefix="/api")  # Public auth endpoints
+app.include_router(interviews.router, prefix="/api")  # Admin endpoints (protected)
+app.include_router(chat.router, prefix="/api")  # Chat endpoints (public for candidates)
 
 
 @app.get("/")

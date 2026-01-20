@@ -235,12 +235,15 @@ npm run type-check
 
 ## Documentation
 
-- [Setup Guide](docs/setup.md)
-- [Database Schema](docs/database.md)
-- [AI Agents](docs/agents.md)
-- [Authentication](docs/authentication.md)
-- [Rate Limiting](docs/rate_limiting.md)
-- [Architecture Review](docs/architecture_review.md)
+- [Getting Started](docs/guides/setup.md)
+- [User Manual](docs/guides/user_manual.md)
+- [Deployment Guide (Docker)](docs/deployment/general.md)
+- [Deployment Guide (k3s)](docs/deployment/k3s.md)
+- [Architecture Overview](docs/architecture/overview.md)
+- [AI Agents](docs/architecture/agents.md)
+- [Authentication](docs/architecture/authentication.md)
+- [Rate Limiting](docs/architecture/rate_limiting.md)
+- [Database Schema](docs/architecture/database.md)
 
 ## Security Features
 
