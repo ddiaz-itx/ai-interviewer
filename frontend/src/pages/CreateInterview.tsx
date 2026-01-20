@@ -35,8 +35,22 @@ export default function CreateInterview() {
 
             setInterviewId(interview.id);
             setStep('upload');
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to create interview');
+        } catch (err: any) {
+            let errorMessage = 'Failed to create interview';
+            if (err.response?.data?.detail) {
+                const detail = err.response.data.detail;
+                if (Array.isArray(detail)) {
+                    // Pydantic validation error list
+                    errorMessage = detail.map((e: any) => e.msg).join(', ');
+                } else if (typeof detail === 'object') {
+                    errorMessage = JSON.stringify(detail);
+                } else {
+                    errorMessage = String(detail);
+                }
+            } else if (err instanceof Error) {
+                errorMessage = err.message;
+            }
+            setError(errorMessage);
         } finally {
             setLoading(false);
         }
@@ -88,6 +102,25 @@ export default function CreateInterview() {
         <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-8">
             <div className="max-w-2xl mx-auto">
                 <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-8 border border-white/20">
+                    <button
+                        onClick={() => navigate('/admin')}
+                        className="mb-6 flex items-center text-purple-200 hover:text-white transition-colors duration-200"
+                    >
+                        <svg
+                            className="w-5 h-5 mr-2"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                            />
+                        </svg>
+                        Back to Dashboard
+                    </button>
                     <h1 className="text-3xl font-bold text-white mb-2">Create New Interview</h1>
                     <p className="text-purple-200 mb-8">
                         Configure interview settings and upload required documents
@@ -98,8 +131,8 @@ export default function CreateInterview() {
                         <div className="flex items-center">
                             <div
                                 className={`w-10 h-10 rounded-full flex items-center justify-center ${step === 'config'
-                                        ? 'bg-purple-500 text-white'
-                                        : 'bg-green-500 text-white'
+                                    ? 'bg-purple-500 text-white'
+                                    : 'bg-green-500 text-white'
                                     }`}
                             >
                                 {step === 'config' ? '1' : '✓'}
@@ -117,10 +150,10 @@ export default function CreateInterview() {
                         <div className="flex items-center">
                             <div
                                 className={`w-10 h-10 rounded-full flex items-center justify-center ${step === 'upload'
-                                        ? 'bg-purple-500 text-white'
-                                        : step === 'analyzing'
-                                            ? 'bg-green-500 text-white'
-                                            : 'bg-white/20 text-white/50'
+                                    ? 'bg-purple-500 text-white'
+                                    : step === 'analyzing'
+                                        ? 'bg-green-500 text-white'
+                                        : 'bg-white/20 text-white/50'
                                     }`}
                             >
                                 {step === 'analyzing' ? '✓' : '2'}
@@ -143,8 +176,8 @@ export default function CreateInterview() {
                         <div className="flex items-center">
                             <div
                                 className={`w-10 h-10 rounded-full flex items-center justify-center ${step === 'analyzing'
-                                        ? 'bg-purple-500 text-white'
-                                        : 'bg-white/20 text-white/50'
+                                    ? 'bg-purple-500 text-white'
+                                    : 'bg-white/20 text-white/50'
                                     }`}
                             >
                                 3
@@ -196,7 +229,7 @@ export default function CreateInterview() {
                                 </label>
                                 <input
                                     type="number"
-                                    min="1"
+                                    min="3"
                                     max="10"
                                     step="0.5"
                                     value={formData.difficultyStart}
